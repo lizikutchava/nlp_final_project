@@ -1,0 +1,13 @@
+venv/
+.idea/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+data/
+saved_models/
+outputs/
+*.pt
+*.pth
+*.bin
