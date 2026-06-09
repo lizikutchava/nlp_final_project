@@ -6,9 +6,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-TRAIN_PATH = Path("data/pairs/train.json")
-VAL_PATH = Path("data/pairs/val.json")
-TEST_PATH = Path("data/pairs/test.json")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TRAIN_PATH = PROJECT_ROOT / "data/pairs/train.json"
+VAL_PATH = PROJECT_ROOT / "data/pairs/val.json"
+TEST_PATH = PROJECT_ROOT / "data/pairs/test.json"
 
 
 def load_json(path: Path) -> List[Dict]:
