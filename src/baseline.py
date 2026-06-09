@@ -120,11 +120,10 @@ def demo_search() -> None:
     """
     Small test function for checking whether baseline search works.
     """
-    print("Loading data...")
-    train_data = load_json(TRAIN_PATH)
+    print("Building book corpus...")
+    from corpus import build_book_corpus
 
-    print("Building corpus...")
-    documents, metadata = build_corpus(train_data)
+    documents, metadata = build_book_corpus()
 
     print(f"Number of documents: {len(documents)}")
 

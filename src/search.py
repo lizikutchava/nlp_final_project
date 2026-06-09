@@ -146,10 +146,9 @@ class NeuralSearchEngine:
 
 
 def demo_search(checkpoint_path: Optional[str] = None) -> None:
-    from baseline import build_corpus, load_json, TRAIN_PATH
+    from corpus import build_book_corpus
 
-    train_data = load_json(TRAIN_PATH)
-    documents, metadata = build_corpus(train_data)
+    documents, metadata = build_book_corpus()
 
     model = load_encoder(checkpoint_path)
     engine = NeuralSearchEngine(model)
