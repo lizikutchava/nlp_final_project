@@ -1,3 +1,4 @@
+import argparse
 from typing import Dict, List, Optional
 
 import torch
@@ -65,13 +66,26 @@ def load_encoder(
     device: Optional[torch.device] = None,
 ) -> TextEncoder:
     device = device or get_device()
-    model = TextEncoder(model_name=model_name)
 
     if checkpoint_path is not None:
         state = torch.load(checkpoint_path, map_location=device)
+        model_type = state.get("model_type") if isinstance(state, dict) else None
+        if model_type == "transformer_scratch":
+            from vocab import Vocab
+            from transformer_encoder import TransformerEncoder
+
+            model = TransformerEncoder(Vocab.from_dict(state["vocab"]), **state["config"])
+            model.load_state_dict(state["model_state_dict"])
+            model.to(device)
+            model.eval()
+            return model
+
+        model = TextEncoder(model_name=model_name)
         if isinstance(state, dict) and "model_state_dict" in state:
             state = state["model_state_dict"]
         model.load_state_dict(state)
+    else:
+        model = TextEncoder(model_name=model_name)
 
     model.to(device)
     model.eval()
@@ -145,10 +159,11 @@ class NeuralSearchEngine:
         self.documents = data["documents"]
 
 
-def demo_search(checkpoint_path: Optional[str] = None) -> None:
+def demo_search(checkpoint_path: Optional[str] = None, top_k: int = 5) -> None:
     from corpus import build_book_corpus
 
     documents, metadata = build_book_corpus()
+    print(f"Loaded {len(documents)} chunks from the book corpus.")
 
     model = load_encoder(checkpoint_path)
     engine = NeuralSearchEngine(model)
@@ -158,10 +173,15 @@ def demo_search(checkpoint_path: Optional[str] = None) -> None:
         query = input("\nEnter query, or type 'exit': ").strip()
         if query.lower() == "exit":
             break
-        for result in engine.search(query, top_k=5):
-            print(f"\nRank: {result['rank']}  Score: {result['score']:.4f}")
+        for result in engine.search(query, top_k=top_k):
+            source = result.get("source", "?")
+            print(f"\nRank: {result['rank']}  Score: {result['score']:.4f}  Source: {source}")
             print(f"Text: {result['text'][:500]}...")
 
 
 if __name__ == "__main__":
-    demo_search()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--checkpoint", default=None)
+    parser.add_argument("--top_k", type=int, default=5)
+    args = parser.parse_args()
+    demo_search(checkpoint_path=args.checkpoint, top_k=args.top_k)

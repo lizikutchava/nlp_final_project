@@ -37,6 +37,19 @@ def collate(batch) -> Tuple[List[str], List[str], List[str]]:
     return list(queries), list(positives), list(negatives)
 
 
+def checkpoint_payload(model, model_type, model_name, epoch=None, val_metrics=None) -> Dict:
+    payload = {"model_state_dict": model.state_dict(), "model_name": model_name}
+    if epoch is not None:
+        payload["epoch"] = epoch
+    if val_metrics is not None:
+        payload["val_metrics"] = val_metrics
+    if model_type == "transformer_scratch":
+        payload["model_type"] = model_type
+        payload["vocab"] = model.vocab.to_dict()
+        payload["config"] = model.config
+    return payload
+
+
 def train(
     epochs: int = 2,
     batch_size: int = 32,
@@ -46,6 +59,7 @@ def train(
     max_val_samples: int = 1000,
     max_length: int = 256,
     model_name: str = "distilbert-base-uncased",
+    model_type: str = "transformer",
     log_every: int = 50,
 ) -> Dict:
     device = get_device()
@@ -60,7 +74,20 @@ def train(
     if max_val_samples:
         val_data = val_data[:max_val_samples]
 
-    model = TextEncoder(model_name=model_name).to(device)
+    if model_type == "transformer_scratch":
+        from vocab import Vocab
+        from transformer_encoder import TransformerEncoder
+
+        texts = []
+        for item in train_ds.data:
+            texts.extend((item["query"], item["positive"], item["negative"]))
+        vocab = Vocab.build(texts)
+        print(f"Built vocabulary of {len(vocab)} tokens")
+        model = TransformerEncoder(vocab).to(device)
+    else:
+        model = TextEncoder(model_name=model_name).to(device)
+
+    tag = {"transformer": "", "transformer_scratch": "tfscratch_"}[model_type]
 
     if loss_type == "infonce":
         criterion = InfoNCELoss(scale=20.0)
@@ -109,22 +136,12 @@ def train(
         printable = ", ".join(f"{k}={v:.4f}" for k, v in val_metrics.items() if k != "epoch")
         print(f"[val] epoch {epoch}: {printable}")
 
-        ckpt = CHECKPOINT_DIR / f"encoder_{loss_type}_epoch{epoch}.pt"
-        torch.save(
-            {
-                "model_state_dict": model.state_dict(),
-                "model_name": model_name,
-                "epoch": epoch,
-                "val_metrics": val_metrics,
-            },
-            ckpt,
-        )
+        ckpt = CHECKPOINT_DIR / f"encoder_{tag}{loss_type}_epoch{epoch}.pt"
+        torch.save(checkpoint_payload(model, model_type, model_name, epoch, val_metrics), ckpt)
 
-    torch.save(
-        {"model_state_dict": model.state_dict(), "model_name": model_name},
-        CHECKPOINT_DIR / f"encoder_{loss_type}_final.pt",
-    )
-    with open(CHECKPOINT_DIR / f"history_{loss_type}.json", "w") as f:
+    final_payload = checkpoint_payload(model, model_type, model_name)
+    torch.save(final_payload, CHECKPOINT_DIR / f"encoder_{tag}{loss_type}_final.pt")
+    with open(CHECKPOINT_DIR / f"history_{tag}{loss_type}.json", "w") as f:
         json.dump(history, f, indent=2)
 
     return history
@@ -134,18 +151,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=2e-5)
+    parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--loss", dest="loss_type", default="infonce",
                         choices=["infonce", "triplet"])
+    parser.add_argument("--model_type", default="transformer",
+                        choices=["transformer", "transformer_scratch"])
     parser.add_argument("--max_train_samples", type=int, default=None)
     parser.add_argument("--max_val_samples", type=int, default=1000)
     args = parser.parse_args()
 
+    default_lr = {"transformer_scratch": 3e-4, "transformer": 2e-5}
+    lr = args.lr if args.lr is not None else default_lr[args.model_type]
+
     train(
         epochs=args.epochs,
         batch_size=args.batch_size,
-        lr=args.lr,
+        lr=lr,
         loss_type=args.loss_type,
+        model_type=args.model_type,
         max_train_samples=args.max_train_samples,
         max_val_samples=args.max_val_samples,
     )
