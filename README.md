@@ -7,56 +7,49 @@
 
 ## Project Structure
 NLP_FINAL_PROJECT/
-
 ├── checkpoints/          # Saved model checkpoints
-
 ├── data/
-
 │   ├── book/             # Jurafsky & Martin SLP3 chapter texts
-
 │   ├── pairs/            # train.json, val.json, test.json
-
 │   └── raw/              # Raw MS MARCO download
-
 ├── notebooks/
-
 │   ├── data_exploration.ipynb
-
 │   ├── training.ipynb
-
 │   └── evaluation.ipynb
-
 ├── src/
-
 │   ├── baseline.py       # TF-IDF search engine
-
 │   ├── corpus.py         # Book text chunking (200-300 words)
-
 │   ├── data_prep.py      # MS MARCO download and split
-
 │   ├── evaluate.py       # Recall@k and MRR evaluation
-
 │   ├── fetch_book.py     # Download SLP3 chapters from Stanford
-
 │   ├── loss.py           # InfoNCE and Triplet loss
-
 │   ├── model.py          # DistilBERT-based TextEncoder
-
 │   ├── search.py         # NeuralSearchEngine + encode_texts
-
 │   ├── train.py          # Training loop
-
 │   ├── transformer_encoder.py  # Transformer built from scratch
-
 │   └── vocab.py          # Word-level tokenizer and vocabulary
-
 └── tests/
-
 └── test_book_search.py
 
 
 ## Pipeline
 query → text encoder → query embedding → cosine similarity → top-k chunks
+
+
+## Key Concepts
+
+კონტრასტული სწავლება (Contrastive Learning): ენკოდერი მუშაობს პოზიტიურ წყვილებზე (მოთხოვნა + რელევანტური პასაჟი)
+და ნეგატიურ წყვილებზე (მოთხოვნა + შეუსაბამო პასაჟი). მოდელი სწავლობს, რომ ემბედინგების სივრცეში პოზიტიური წყვილები
+ერთმანეთთან ახლოს მიიზიდოს, ხოლო ნეგატიური წყვილები ერთმანეთისგან მაქსიმალურად დააშოროს (განაზიდოს).
+
+ლექსიკური შეუსაბამობა (Vocabulary Mismatch): TF-IDF ვერ უმკლავდება სიტუაციებს, როდესაც მოთხოვნასა და დოკუმენტში
+ერთი და იმავე იდეის გადმოსაცემად სხვადასხვა სიტყვებია გამოყენებული (მაგალითად, „მანქანა“ და „ავტომობილი“).
+მკვრივი ძიება (dense retrieval) ამ პრობლემას იმით აგვარებს, რომ პერეფრაზებს ერთმანეთთან ახლომდებარ
+ე ვექტორებად ასახავს, მიუხედავად მათი ზედაპირული (სიტყვიერი) ფორმისა.
+
+ბეჩშიდა ნეგატივები (In-batch Negatives): InfoNCE დანაკარგის ფუნქცია მიმდინარე ბეჩში (ჯგუფში) არსებულ ყველა
+სხვა პოზიტიურ წყვილს განიხილავს, როგორც დამატებით ნეგატიურ მაგალითს. შედეგად, 64-იანი ბეჩის ზომის (batch size)
+შემთხვევაში, თითოეული მოთხოვნა ყოველ ბიჯზე 1 ნეგატივის ნაცვლად 127 ნეგატივს ხედავს.
 
 
 ## Data
