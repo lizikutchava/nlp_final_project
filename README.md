@@ -6,6 +6,7 @@
 
 
 ## Project Structure
+```
 NLP_FINAL_PROJECT/
 
 ├── checkpoints/          # Saved model checkpoints
@@ -53,7 +54,7 @@ NLP_FINAL_PROJECT/
 └── tests/
 
 └── test_book_search.py
-
+```
 
 ## Pipeline
 ```
