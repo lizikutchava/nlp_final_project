@@ -96,7 +96,6 @@ def chunk_text(
     max_words: int = MAX_WORDS,
     target_words: int = TARGET_WORDS,
 ) -> List[str]:
-    """Split text into self-contained chunks of roughly target_words words."""
     text = normalize_whitespace(text)
     sentences: List[str] = []
     for paragraph in text.split("\n\n"):
@@ -129,7 +128,7 @@ def chunk_text(
 
 
 def load_book_texts(book_dir: Path = BOOK_DIR) -> List[Tuple[str, str]]:
-    """Load (source, text) pairs from .txt files, or fall back to the stand-in text."""
+
     if book_dir.exists():
         texts = []
         for path in sorted(book_dir.glob("*.txt")):
@@ -139,7 +138,6 @@ def load_book_texts(book_dir: Path = BOOK_DIR) -> List[Tuple[str, str]]:
         if texts:
             return texts
 
-    print(f"[corpus] No .txt files in {book_dir}, using stand-in corpus.")
     return [("stand_in", STAND_IN_TEXT)]
 
 
@@ -149,7 +147,6 @@ def build_book_corpus(
     max_words: int = MAX_WORDS,
     target_words: int = TARGET_WORDS,
 ) -> Tuple[List[str], List[Dict]]:
-    """Build (documents, metadata) for the search engines from the book text."""
     documents: List[str] = []
     metadata: List[Dict] = []
 
@@ -192,7 +189,6 @@ def main() -> None:
     stats = corpus_stats(metadata)
 
     print("\nBook corpus built")
-    print("-----------------")
     for key, value in stats.items():
         if isinstance(value, float):
             print(f"{key:<14} {value:.3f}")
@@ -201,7 +197,6 @@ def main() -> None:
 
     if documents:
         print("\nExample chunk (first):")
-        print("----------------------")
         print(documents[0][:600], "...")
 
 

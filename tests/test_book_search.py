@@ -1,10 +1,3 @@
-"""Dependency-free smoke test for the book search flow.
-
-Verifies that build_book_corpus() feeds the search engines correctly: it mirrors
-the fit -> search -> result contract (rank/score/text) used by the demo, using a
-small stdlib TF-IDF so it runs without scikit-learn or torch installed.
-"""
-
 import math
 import re
 import sys

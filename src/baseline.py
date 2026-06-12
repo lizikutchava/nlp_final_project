@@ -13,9 +13,7 @@ TEST_PATH = PROJECT_ROOT / "data/pairs/test.json"
 
 
 def load_json(path: Path) -> List[Dict]:
-    """
-    Load a JSON file containing query-document pairs.
-    """
+
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
@@ -24,15 +22,7 @@ def load_json(path: Path) -> List[Dict]:
 
 
 def get_document_text(item: Dict) -> str:
-    """
-    Return the positive document text.
 
-    Supports both possible field names:
-    - positive_doc
-    - positive
-
-    This is useful because your existing data may use "positive".
-    """
     if "positive_doc" in item:
         return item["positive_doc"]
 
@@ -43,9 +33,7 @@ def get_document_text(item: Dict) -> str:
 
 
 def build_corpus(data: List[Dict]) -> Tuple[List[str], List[Dict]]:
-    """
-    Build a list of document texts and matching metadata.
-    """
+
     documents = []
     metadata = []
 
@@ -69,12 +57,6 @@ def build_corpus(data: List[Dict]) -> Tuple[List[str], List[Dict]]:
 
 
 class TfidfSearchEngine:
-    """
-    Simple TF-IDF search engine.
-
-    It fits a TF-IDF vectorizer on documents, then retrieves top-k documents
-    for a user query using cosine similarity.
-    """
 
     def __init__(self) -> None:
         self.vectorizer = TfidfVectorizer(
@@ -87,17 +69,13 @@ class TfidfSearchEngine:
         self.metadata: List[Dict] = []
 
     def fit(self, documents: List[str], metadata: List[Dict]) -> None:
-        """
-        Fit TF-IDF vectorizer on document corpus.
-        """
+
         self.documents = documents
         self.metadata = metadata
         self.document_vectors = self.vectorizer.fit_transform(documents)
 
     def search(self, query: str, top_k: int = 5) -> List[Dict]:
-        """
-        Search top-k most similar documents for the given query.
-        """
+
         if self.document_vectors is None:
             raise ValueError("Search engine is not fitted yet. Call fit() first.")
 
@@ -117,17 +95,11 @@ class TfidfSearchEngine:
 
 
 def demo_search() -> None:
-    """
-    Small test function for checking whether baseline search works.
-    """
-    print("Building book corpus...")
+
     from corpus import build_book_corpus
 
     documents, metadata = build_book_corpus()
 
-    print(f"Number of documents: {len(documents)}")
-
-    print("Fitting TF-IDF search engine...")
     search_engine = TfidfSearchEngine()
     search_engine.fit(documents, metadata)
 
@@ -140,7 +112,6 @@ def demo_search() -> None:
         results = search_engine.search(query, top_k=5)
 
         print("\nTop results:")
-        print("------------")
 
         for result in results:
             print(f"\nRank: {result['rank']}")

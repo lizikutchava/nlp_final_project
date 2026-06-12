@@ -9,10 +9,8 @@ def download_and_save_msmarco(output_dir="data", n_samples=50000, seed=42):
     os.makedirs(f"{output_dir}/processed", exist_ok=True)
     os.makedirs(f"{output_dir}/pairs", exist_ok=True)
 
-    print("Downloading MS MARCO...")
     ds = load_dataset("microsoft/ms_marco", "v2.1", split="train")  # ← fixed
 
-    print("Processing pairs...")
     pairs = []
 
     for item in ds:
@@ -42,12 +40,10 @@ def download_and_save_msmarco(output_dir="data", n_samples=50000, seed=42):
         if len(pairs) >= n_samples:
             break
 
-    # save raw
     with open(f"{output_dir}/raw/msmarco_raw.json", "w") as f:
         json.dump(pairs, f, indent=2)
     print(f"Saved {len(pairs)} raw pairs")
 
-    # shuffle and split
     random.seed(seed)
     random.shuffle(pairs)
 

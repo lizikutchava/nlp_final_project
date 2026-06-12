@@ -98,7 +98,6 @@ def evaluate_tfidf_baseline(top_k: int = 10, max_eval_samples: int = 1000) -> Di
     metrics = summarize(evaluate_engine(engine, test_data, top_k))
 
     print("\nTF-IDF Baseline Results")
-    print("-----------------------")
     for key, value in metrics.items():
         print(f"{key:<10} {value:.4f}")
     return metrics

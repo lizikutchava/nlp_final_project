@@ -6,13 +6,6 @@ from transformers import AutoModel, AutoTokenizer
 
 
 class TextEncoder(nn.Module):
-    """
-    Transformer-based text encoder for neural retrieval.
-
-    It takes input text, passes it through a pretrained transformer,
-    then applies mean pooling over token embeddings to produce
-    a single dense vector for the whole text.
-    """
 
     def __init__(self, model_name: str = "distilbert-base-uncased"):
         super().__init__()
@@ -26,15 +19,6 @@ class TextEncoder(nn.Module):
         token_embeddings: torch.Tensor,
         attention_mask: torch.Tensor,
     ) -> torch.Tensor:
-        """
-        Mean pooling with attention mask.
-
-        token_embeddings shape:
-            [batch_size, seq_len, hidden_dim]
-
-        attention_mask shape:
-            [batch_size, seq_len]
-        """
 
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size())
         input_mask_expanded = input_mask_expanded.float()
@@ -49,12 +33,6 @@ class TextEncoder(nn.Module):
         input_ids: torch.Tensor,
         attention_mask: torch.Tensor,
     ) -> torch.Tensor:
-        """
-        Forward pass.
-
-        Returns:
-            sentence/document embeddings with shape [batch_size, hidden_dim]
-        """
 
         outputs = self.transformer(
             input_ids=input_ids,
@@ -77,9 +55,6 @@ class TextEncoder(nn.Module):
         texts,
         max_length: int = 256,
     ) -> Dict[str, torch.Tensor]:
-        """
-        Tokenize a list of texts.
-        """
 
         return self.tokenizer(
             texts,
@@ -91,9 +66,6 @@ class TextEncoder(nn.Module):
 
 
 def test_encoder() -> None:
-    """
-    Small test to verify that the encoder works.
-    """
 
     model = TextEncoder()
 
