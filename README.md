@@ -56,7 +56,9 @@ NLP_FINAL_PROJECT/
 
 
 ## Pipeline
+```
 query → text encoder → query embedding → cosine similarity → top-k chunks
+```
 
 
 ## Key Concepts
@@ -109,6 +111,7 @@ query → text encoder → query embedding → cosine similarity → top-k chunk
 ორივე მოდელი გაწვრთნილია კონტრასტული სწავლების (contrastive learning) მეთოდით:
 
 | Setting | Transformer (scratch) | DistilBERT |
+|---|---|---|
 | Loss | InfoNCE / Triplet | InfoNCE |
 | Optimizer | AdamW | AdamW |
 | Learning rate | 3e-4 | 2e-5 |
@@ -128,6 +131,7 @@ InfoNCE არის ძირითადი დანაკარგის ფ
 
 
 | Model | Recall@1 | Recall@5 | Recall@10 | MRR |
+|---|---|---|---|---|
 | TF-IDF (baseline) | 0.684 | 0.872 | 0.908 | 0.764 |
 | Transformer-scratch (InfoNCE) | 0.400 | 0.550 | 0.622 | 0.464 |
 | DistilBERT (InfoNCE) | 0.806 | 0.940 | 0.966 | 0.865 |
@@ -135,6 +139,7 @@ InfoNCE არის ძირითადი დანაკარგის ფ
 DistilBERT-ი ყველა მეტრიკაში სჯობს TF-IDF-ს. ნულიდან აგებული ტრანსფორმერი ჩამორჩება
 TF-IDF-ს საწვრთნელი მონაცემების მცირე რაოდენობისა და შემთხვევითი ნეგატივების გამოყენების გამო — რთული ნეგატივების მოპოვება
 (hard negative mining) ამ სხვაობას საგრძნობლად შეამცირებდა.
+
 
 ## Setup
 
